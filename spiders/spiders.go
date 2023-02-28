@@ -4,14 +4,15 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/ericzhao007/m3u8-downloader/m3u8"
-	"github.com/ericzhao007/m3u8-downloader/m3u8/parses"
-	"github.com/ericzhao007/m3u8-downloader/schedule"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
+
+	"github.com/ericzhao007/m3u8-downloader/m3u8"
+	"github.com/ericzhao007/m3u8-downloader/m3u8/parses"
+	"github.com/ericzhao007/m3u8-downloader/schedule"
 
 	"github.com/vbauerster/mpb/v8"
 )
@@ -91,7 +92,11 @@ func (s *Spiders) Run(filePath string) error {
 		m3u8inf := v.(*parses.M3U8Inf)
 		m3u8infUrl, _ := url.Parse(m3u8inf.Data)
 		dataUrl := s.m3u8Url.ResolveReference(m3u8infUrl)
+		// log.Println(dataUrl.String())
 		resp, _ := http.DefaultClient.Get(dataUrl.String())
+		// if err != nil {
+		// 	log.Println(err)
+		// }
 		defer resp.Body.Close()
 		bar.SetTotal(resp.ContentLength, false)
 		proxyRader := bar.ProxyReader(resp.Body)
@@ -100,7 +105,7 @@ func (s *Spiders) Run(filePath string) error {
 		if mp.Encryption != nil {
 			bys = mp.Encryption.AesDecrypt(bys)
 		}
-		s.tsData.Store(m3u8inf.Name(), bys)
+		s.tsData.Store(m3u8inf.HashId(), bys)
 	})
 	// 视频合并
 	videoFile, err := os.Create(filePath)
@@ -110,7 +115,7 @@ func (s *Spiders) Run(filePath string) error {
 	defer videoFile.Close()
 	fmt.Println("正在合并...")
 	for _, payItem := range mp.PayList {
-		v, exists := s.tsData.Load(payItem.Name())
+		v, exists := s.tsData.Load(payItem.HashId())
 		if !exists {
 			return errors.New("download faild :" + payItem.Name())
 		}

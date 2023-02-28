@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+
 	"github.com/ericzhao007/m3u8-downloader/spiders"
 )
 
@@ -17,6 +18,13 @@ func main() {
 		fmt.Println("请填写m3u8地址")
 		return
 	}
+	// appLog, err := os.Create("app.log")
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	return
+	// }
+	// defer appLog.Close()
+	// log.Default().SetOutput(appLog)
 	var withs []spiders.WithFunc
 	if *useMemory {
 		withs = append(withs, spiders.WithMemoryStoreEngine())
@@ -25,5 +33,8 @@ func main() {
 	}
 	withs = append(withs, spiders.WithWorkerNum(*workerNum))
 	s := spiders.NewSpiders(*m3u8Url, withs...)
-	s.Run(*filePath)
+	if err := s.Run(*filePath); err != nil {
+		fmt.Println(err)
+	}
+
 }

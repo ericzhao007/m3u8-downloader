@@ -1,6 +1,9 @@
 package parses
 
-import "strings"
+import (
+	"github.com/duke-git/lancet/v2/cryptor"
+	"strings"
+)
 
 type M3U8Inf struct {
 	Duration string
@@ -27,4 +30,8 @@ func (mi *M3U8Inf) M3U8Type() string {
 
 func (mi *M3U8Inf) Name() string {
 	return mi.Data
+}
+
+func (mi *M3U8Inf) HashId() string {
+	return cryptor.Md5String(mi.Data)
 }

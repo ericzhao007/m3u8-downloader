@@ -14,7 +14,9 @@ type DiskStoreEngine struct {
 
 func NewDiskStoreEngine(workDir string) *DiskStoreEngine {
 	if exists := fileutil.IsExist(workDir); !exists {
-		if err := fileutil.CreateDir(workDir); err != nil {
+		if err := os.MkdirAll(workDir, os.ModePerm); err != nil {
+			// fmt.Println(err)
+			// os.Exit(1)
 			return nil
 		}
 	}
